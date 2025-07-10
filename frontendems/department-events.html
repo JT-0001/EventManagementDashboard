@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Events</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: rgb(0, 0, 0);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .event {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgb(17, 1, 1);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .poster-thumbnail {
+            width: 350px;
+            /* or any smaller size you want */
+            height: auto;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .poster-thumbnail:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <h1 id="department-name">Department Events</h1>
+        <a href="index.html" class="back-btn">Back</a>
+        <a id="clubEventsBtn" href="clubs.html" class="back-btn" style="display: none;">Club-wise Events</a>
+
+    </div>
+
+    <div id="eventContainer"></div>
+
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const department = urlParams.get("department"); // e.g., ?dept=Design
+
+        document.getElementById("department-name").textContent = `${department} Department Events`;
+        if (department.toLowerCase() === "soc") {
+            document.getElementById("clubEventsBtn").style.display = "inline-block";
+        }
+        const token = localStorage.getItem("token"); // get the JWT token from localStorage
+
+        fetch(`http://localhost:8080/api/events/${department}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch events");
+                }
+                return res.json();
+            })
+            .then(events => {
+                const container = document.getElementById("eventContainer");
+                container.innerHTML = "";
+
+                if (events.length === 0) {
+                    container.innerHTML = "<p>No events available for this department.</p>";
+                    return;
+                }
+
+                events.forEach(event => {
+                    const div = document.createElement("div");
+                    div.classList.add("event");
+                    div.innerHTML = `
+        <h3>${event.title}</h3>
+        <p>${event.description}</p>
+        <p><strong>Date:</strong> ${event.date}</p>
+        <p><strong>Venue:</strong> ${event.venue}</p>
+        <p><a href="${event.registrationLink}" target="_blank" style="color: #fff; text-decoration: underline;">Register Here</a></p>
+       ${event.posterUrl ? `<img src="${event.posterUrl}" alt="Poster" class="poster-thumbnail">` : ''}
+
+    `;
+                    container.appendChild(div);
+                });
+
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("eventContainer").innerHTML = "<p>Error loading events. Please try again later.</p>";
+            });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Events</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            text-align: center;
+            color: white;
+        }
+
+        .container {
+            margin: 50px auto;
+            padding: 30px;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="department-title">Department Events</h1>
+    <div class="container" id="event-list">
+        <h2>Event List</h2>
+    </div>
+
+    <script>
+        function getDepartmentFromQuery() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('department') || 'unknown';
+        }
+
+        async function displayEvents() {
+            const department = getDepartmentFromQuery();
+            document.getElementById("department-title").textContent = `${department.charAt(0).toUpperCase() + department.slice(1)} Department Events`;
+
+            const eventListContainer = document.getElementById("event-list");
+            eventListContainer.innerHTML = "<h2>Event List</h2>";
+
+            try {
+                const response = await fetch(`http://localhost:8080/events/${department.trim()}`);
+                if (!response.ok) {
+                    throw new Error(`Error fetching events: ${response.status}`);
+                }
+
+                const events = await response.json();
+                if (events.length === 0) {
+                    eventListContainer.innerHTML += "<p>No events available.</p>";
+                    return;
+                }
+
+                events.forEach(event => {
+                    const eventItem = document.createElement("div");
+                    eventItem.className = "event-item";
+                    eventItem.textContent = event.name;  // assuming 'name' is the field from backend
+                    eventListContainer.appendChild(eventItem);
+                });
+            } catch (error) {
+                console.error(error);
+                eventListContainer.innerHTML += "<p>Error fetching events. Please try again later.</p>";
+            }
+        }
+
+        window.onload = displayEvents;
+    </script>
+</body>
+</html>

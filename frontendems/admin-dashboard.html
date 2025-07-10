@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #ff9966, #ff5e62);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: rgb(4, 0, 0);
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: rgba(0, 0, 0, 0.2);
+      box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .logout-btn {
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.3s;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .logout-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+      transform: scale(1.05);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    input,
+    select {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    button {
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: rgba(0, 0, 0, 0.9);
+      transform: scale(1.05);
+    }
+
+    .event-list {
+      margin-top: 20px;
+    }
+
+    .event-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .delete-btn {
+      background: red;
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+      float: right;
+    }
+
+    .delete-btn:hover {
+      background: darkred;
+    }
+
+    .poster-img {
+      max-width: 100px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    a {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    .poster-thumbnail {
+      width: 80px;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .poster-thumbnail:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="navbar">
+    <h1>Admin Dashboard</h1>
+    <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+  </div>
+
+  <div class="container">
+    <h2>Manage Events</h2>
+    <form onsubmit="addEvent(); return false;">
+      <select id="department" required>
+        <option value="">Select Department</option>
+        <option value="design">Design</option>
+        <option value="soc">SOC</option>
+        <option value="architect">Architect</option>
+      </select>
+      <select id="club" onchange="filterClubEvents()">
+        <option value="">Select Club (for SOC only)</option>
+        <option value="swift">Swift Coding Club</option>
+        <option value="aws">AWS Cloud Club</option>
+        <option value="codechef">CodeChef Club</option>
+        <option value="geeksforgeeks">GeeksforGeeks Student Chapter</option>
+        <option value="google">Google Developer Students Club</option>
+        <option value="cybersecurity">Cybersecurity and Blockchain Club</option>
+        <option value="cognisance">Cognisance</option>
+        <option value="mlsc">MLSC</option>
+        <option value="aces">ACES</option>
+        <option value="java_brewers">JAVA BREWERS</option>
+        <option value="synapse">Synapse AI</option>
+      </select>
+
+      <input id="title" placeholder="Title" required />
+      <input id="description" placeholder="Description" required />
+      <input id="date" type="date" required />
+      <input id="venue" placeholder="Venue" required />
+      <input id="poster" type="file" required />
+      <input id="link" placeholder="Registration Link" required />
+      <button type="submit">Add Event</button>
+    </form>
+
+    <div class="event-list" id="adminEventList">
+      <h3>Event List</h3>
+    </div>
+  </div>
+
+  <script>
+    if (localStorage.getItem("adminLoggedIn") !== "true") {
+      window.location.href = "admin-login.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("adminLoggedIn");
+      window.location.href = "admin-login.html";
+    }
+    formData.append("club", document.getElementById("club").value);
+
+    function addEvent() {
+      const department = document.getElementById("department").value.trim();
+      const club = document.getElementById("club").value.trim();
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      const date = document.getElementById("date").value;
+      const venue = document.getElementById("venue").value;
+      const poster = document.getElementById("poster").files[0];
+      const link = document.getElementById("link").value;
+
+      const formData = new FormData();
+      formData.append("department", department);
+      formData.append("club", club);
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("date", date);
+      formData.append("venue", venue);
+      formData.append("poster", poster);
+      formData.append("link", link);
+
+      fetch("http://localhost:8080/api/events", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error("Failed to add event");
+          }
+          return res.json();
+        })
+        .then(data => {
+          alert("Event added!");
+          document.querySelector("form").reset();
+          loadEvents();
+        })
+        .catch(err => {
+          alert("Error: " + err.message);
+        });
+    }
+
+    function deleteEvent(id) {
+      fetch(`http://localhost:8080/api/events/${id}`, {
+        method: "DELETE"
+      }).then(() => {
+        alert("Deleted!");
+        loadEvents();
+      });
+    }
+
+    function loadEvents() {
+      fetch("http://localhost:8080/api/events")
+        .then(res => res.json())
+        .then(events => {
+          const container = document.getElementById("adminEventList");
+          container.innerHTML = "<h3>Event List</h3>";
+          events.forEach(event => {
+            const div = document.createElement("div");
+            div.className = "event-item";
+            div.innerHTML = `
+                    <button class="delete-btn" onclick="deleteEvent(${event.id})">Delete</button>
+                    <strong>${event.title}</strong> (${event.department})<br>
+                    ${event.description}<br>
+                    <small>Date: ${event.date}</small><br>
+                    <small>Venue: ${event.venue}</small><br>
+                    <a href="${event.link}" target="_blank">Registration Link</a><br>
+                    ${event.poster ?
+                `<a href="${event.poster}" target="_blank">
+                        <img src="${event.poster}" alt="Poster" class="poster-thumbnail" />
+                      </a>`
+                : ''}
+                `;
+            container.appendChild(div);
+          });
+        });
+    }
+
+    window.onload = loadEvents;
+  </script>
+</body>
+
+</html>

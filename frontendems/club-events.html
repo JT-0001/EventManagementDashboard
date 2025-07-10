@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Club Events</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #d0f0ff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .event {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .event img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    a.back {
+      display: inline-block;
+      margin-top: 20px;
+      background: #0077cc;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="club-name">Club Events</h1>
+  <div id="clubEventContainer"></div>
+  <a href="clubs.html" class="back">Back to Clubs</a>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const club = urlParams.get("club")?.trim();
+
+    document.getElementById("club-name").textContent = `${club} Events`;
+
+    const token = localStorage.getItem("token");
+
+    // Fetch events for the specified club
+    fetch(`http://localhost:8080/api/events/SOC/clubs/${encodeURIComponent(club)}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch club events');
+        }
+        return res.json();
+      })
+      .then(events => {
+        const container = document.getElementById("clubEventContainer");
+        if (events.length === 0) {
+          container.innerHTML = "<p>No events available for this club.</p>";
+          return;
+        }
+
+        events.forEach(event => {
+          const div = document.createElement("div");
+          div.classList.add("event");
+          div.innerHTML = `
+            <h2>${event.title}</h2>
+            <p>${event.description}</p>
+            <p><strong>Date:</strong> ${event.date}</p>
+            <p><strong>Venue:</strong> ${event.venue}</p>
+            <a href="${event.registrationLink}" target="_blank">Register Here</a>
+            ${event.poster ? `<img src="${event.poster}" alt="Poster">` : ""}
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        document.getElementById("clubEventContainer").innerHTML = "<p>Error loading club events.</p>";
+      });
+  </script>
+</body>
+</html>
